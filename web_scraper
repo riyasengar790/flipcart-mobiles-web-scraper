@@ -1,0 +1,53 @@
+import requests
+import re
+import pandas as pd
+from bs4 import BeautifulSoup
+names = []
+prices = []
+desc = []
+reviews = []
+for i in range(1,200):
+    url = "https://www.flipkart.com/search?q=mobile%20under%2050000&otracker=search&otracker1=search&marketplace=FLIPKART&as-show=on&as=off&page="+str(i)
+    response = requests.get(url)
+
+    soup = BeautifulSoup(response.text,"lxml")
+    box = soup.find("div",class_ = "_1YokD2 _3Mn1Gg")
+    if box is None:
+        print(f"No content found on page {i}")
+        continue
+    name = box.find_all("div",class_ = "_4rR01T")
+
+    for i in name:
+        n = i.text
+        names.append(n)
+
+    #print(names)  
+    price = box.find_all("div",class_ = "_30jeq3 _1_WHN1")
+    for i in price:
+        p = i.text
+        prices.append(p)
+
+    #print(prices)  
+
+    description = box.find_all("ul",class_ = "_1xgFaf")
+    for i in description:
+        d = i.text
+        desc.append(d)
+
+    #print(desc)  
+
+    rev = box.find_all("div",class_ = "_3LWZlK")
+    for i in rev:
+        r = i.text
+        reviews.append(r)
+
+    #print(reviews)  
+min_length = min(len(names), len(prices), len(desc), len(reviews))
+names = names[:min_length]
+prices = prices[:min_length]
+desc = desc[:min_length]
+reviews = reviews[:min_length]
+df = pd.DataFrame({"Product_name ":names,"Product_price ":prices,"Product_desc":desc,"Product_rating ":reviews})
+#print(df)
+
+df.to_csv("mobiles.csv") 
